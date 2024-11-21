@@ -2,15 +2,24 @@
 
 <template>
 	<Auth>
-    <form class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-      
-    </form>
-  
-  </Auth>
+		<div class="">
+			<auth />
+			
+		</div>
+		<div>
+			
+		</div>
+	</Auth>
 </template>
 
 <script setup>
-	import { ref } from 'vue';
-	const isLogin = ref(false);
 	import Auth from '~/layouts/Auth.vue';
+	import auth from '~/components/Auth.vue';
+	import { useUserStore } from '~/store/user.js';
+	const user = useUserStore();
+	watchEffect(() => {
+		if (user.isAuthenticated) {
+			navigateTo('');
+		}
+	});
 </script>

@@ -1,13 +1,10 @@
 <template>
   <div>
-    
+    forgot-password
   </div>
 </template>
 
-<script lang="ts" setup>
+<script  setup>
 
 </script>
 
-<style>
-
-</style>

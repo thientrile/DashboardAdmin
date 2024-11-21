@@ -1,11 +1,9 @@
 <!-- @format -->
 
 <template>
-	<div>
-		<div>
-			
-		</div>
-	</div>
+<MainLayout/>
 </template>
 
-<script lang="ts" setup></script>
+<script setup>
+	import MainLayout from '~/layouts/Main.vue';
+</script>
