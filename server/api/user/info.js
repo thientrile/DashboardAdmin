@@ -6,13 +6,13 @@ export default defineEventHandler(async (event) => {
 	const config = useRuntimeConfig();
 
 	try {
-		const response = await $fetch(config.app.apiUrl + '/user/logout', {
+		const response = await $fetch(config.app.apiUrl + '/user/_info', {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,
-				'x-client-id': getCookie(event, 'c_user'),
-				'authorization': getCookie(event, 'accessToken')
+				'x-client-id': getCookie(event, 'x-client-id'),
+				authorization: getCookie(event, 'authorization')
 			}
 		});
 		// Return the exact response structure received

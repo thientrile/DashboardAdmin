@@ -32,10 +32,12 @@
 				>First name <span class="text-red-500"> * </span></label
 			>
 			<input
+				tabindex="0"
 				type="text"
 				id="firstname"
 				name="firstname"
 				autocomplete="given-name"
+			
 				v-model="firstName"
 				class="block w-full py-1.5 rounded-md border-2 focus-visible:border-sky-300"
 				:required="!isLogin" />
@@ -49,6 +51,7 @@
 				>Last name <span class="text-red-500"> * </span></label
 			>
 			<input
+			
 				type="text"
 				id="lastname"
 				name="lastname"
@@ -170,15 +173,16 @@
 				:required="!isLogin" />
 			<span class="ms-2 text-sm"
 				>I agree to the terms of privacy
-				<a
+				<a tabindex="-1"
 					href="#"
 					class="text-red-500 underline"
 					>license</a
 				></span
 			>
 		</div>
-		<div v-else>
+		<div v-else >
 			<a
+			 tabindex="-1"
 				href="/auth/forgot-password"
 				class="block text-end text-sm text-red-500 underline"
 				>Forgot password?</a
@@ -196,7 +200,10 @@
 				<span v-else>{{ isLogin ? 'Login' : 'Register' }}</span>
 			</button>
 		</div>
-		<div class="my-2 w-full h-[2px] bg-black"></div>
+		<div class="my-2 w-full flex justify-center">
+			<span
+			class="w-[15em] bg-gray-500 h-[1px]"></span>
+		</div>
 		<button
 			type="button"
 			@click="
@@ -212,6 +219,7 @@
 <script setup>
 	import { useUserStore } from '~/store/user.js';
 	const user = useUserStore();
+
 	import { ref } from 'vue';
 	const isLoading = ref(false);
 	const isLogin = ref(true);
@@ -268,46 +276,41 @@
 	const submitFrom = async () => {
 		event.preventDefault();
 		isLoading.value = !isPwsError.value;
-		// const passwordHash = await bcrypt.hash(password.value, 10);
+		let req;
 		if (!isLogin.value && isLoading.value) {
 			isLoading.value =
 				!isRepwsError.value && new Date(dateOfBirth.value) < Date.now();
 
-			const req = await $fetch('api/auth/register', {
+			req = await $fetch('api/access/register', {
 				method: 'POST',
 				body: {
 					name: firstName.value + ' ' + lastName.value,
 					email: email.value,
 					password: password.value,
-
 					sex: sex.value,
 					date_of_birth: new Date(dateOfBirth.value)
 				}
 			});
-
-			if (req.status !== 200) {
-				isEmailError.value = true;
-			} else {
-				const { profile, tokens, uniqueId } = req.metadata;
-				await user.authenticate(tokens, uniqueId, profile);
-			}
 		} else if (isLogin.value && isLoading.value) {
-			const req = await $fetch('api/auth/login', {
+			req = await $fetch('api/access/login', {
 				method: 'POST',
 				body: {
 					username: email.value,
 					password: password.value
 				}
 			});
+		}
+		if (req) {
+			if (req.status == 200) {
+				const { tokens, uniqueId } = req.metadata;
 
-			if (req.status !== 200) {
-				isEmailError.value = true;
+				await user.authenticate(tokens, uniqueId);
+				navigateTo('/');
 			} else {
-				const { profile, tokens, uniqueId } = req.metadata;
-
-				await user.authenticate(tokens, uniqueId, profile);
+				isEmailError.value = true;
 			}
 		}
+
 		isLoading.value = false;
 	};
 </script>

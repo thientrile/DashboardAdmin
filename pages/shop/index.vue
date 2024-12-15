@@ -1,0 +1,10 @@
+<template>
+  <div>
+    shop
+  </div>
+</template>
+
+<script setup>
+	definePageMeta({ middleware: 'auth' })
+
+</script>

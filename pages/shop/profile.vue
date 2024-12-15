@@ -1,7 +1,7 @@
 <!-- @format -->
 
 <template>
-	<MainLayout>
+	
 		<div class="flex flex-col">
 				<!-- Cover Image -->
 				<img
@@ -166,11 +166,11 @@
 					</div>
 				</div>
 			</div>
-	</MainLayout>
+
 </template>
 
 <script setup>
-	import MainLayout from '~/layouts/Main.vue';
+	
 	import { useUserStore } from '~/store/user.js';
 	const user = useUserStore();
 	definePageMeta({ middleware: 'auth' })

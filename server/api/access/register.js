@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 	const body = await readBody(event);
 
 try{
-  const response = await $fetch(config.app.apiUrl + '/user/signup', {
+  const response = await $fetch(config.app.apiUrl + '/access/_register', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

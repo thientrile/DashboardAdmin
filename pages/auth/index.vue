@@ -4,11 +4,8 @@
 	<Auth>
 		<div class="">
 			<auth />
-			
 		</div>
-		<div>
-			
-		</div>
+		<div></div>
 	</Auth>
 </template>
 
@@ -17,8 +14,9 @@
 	import auth from '~/components/Auth.vue';
 	import { useUserStore } from '~/store/user.js';
 	const user = useUserStore();
-	watchEffect(() => {
-		if (user.isAuthenticated) {
+
+	onMounted(() => {
+		if (useCookie('x-client-id').value) {
 			navigateTo('');
 		}
 	});

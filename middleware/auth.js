@@ -1,11 +1,7 @@
 /** @format */
 
-import { useUserStore } from '~/stores/user.js';
-export default defineNuxtRouteMiddleware((to, from) => {
-	const user = useUserStore();
-
-	if (!user.isLogin) {
-		// console.log("no esta autenticado");
+export default defineNuxtRouteMiddleware(async (to, from) => {
+	if (!useCookie('x-client-id').value) {
 		return navigateTo('/auth');
 	}
 });

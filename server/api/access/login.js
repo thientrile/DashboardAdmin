@@ -1,5 +1,6 @@
 /** @format */
 
+
 // server/api/login.ts
 
 export default defineEventHandler(async (event) => {
@@ -7,18 +8,21 @@ export default defineEventHandler(async (event) => {
 	const body = await readBody(event);
 
 	try {
-		const response = await $fetch(config.app.apiUrl + '/user/login', {
+	
+		const response = await $fetch(config.app.apiUrl + '/access/_login', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'x-api-key': config.app.apiKey,
-				
+				'x-api-key': config.app.apiKey,				
 			},
 			body: JSON.stringify(body)
 		});
 		// Return the exact response structure received
 		return response;
 	} catch (e) {
+	console.log(e);
 		return e.data;
 	}
+
+	
 });
