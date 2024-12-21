@@ -8,7 +8,7 @@
 					type="button"
 					@click="isNew = !isNew"
 					class="rounded-sm my-1 flex items-center p-1.5 hover:bg-gray-200 dark:hover:text-black">
-					<span class="text-sm font-bold text-nowrap">New Model</span>
+					<span class="text-sm font-bold text-nowrap">New Role</span>
 					<Icon
 						name="ic:baseline-plus"
 						class="font-bold text-xl" />

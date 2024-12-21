@@ -10,7 +10,10 @@ export const useGeneralStore = defineStore('general', {
 	}),
 
 	actions: {
-	
+	createHeaders(body){
+		
+
+	}
 	},
 	getters: {
 	

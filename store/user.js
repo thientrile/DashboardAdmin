@@ -17,6 +17,33 @@ export const useUserStore = defineStore('user', {
 	}),
 
 	actions: {
+		async login(body) {
+			const req = await $fetch('/api/access/login', {
+				method: 'POST',
+				body: JSON.stringify(body)
+			});
+			console.log('🚀 ~ login ~ req:', req);
+
+			if (req.metadata) {
+				const { tokens, uniqueId } = req.metadata;
+				await this.authenticate(tokens, uniqueId);
+				return true;
+			}
+			return false;
+		},
+		async register(body) {
+			const req = await $fetch('/api/access/register', {
+				method: 'POST',
+				body: JSON.stringify(body)
+			});
+			if (req.status == 200) {
+				const { tokens, uniqueId } = req.metadata;
+				await this.authenticate(tokens, uniqueId);
+				return true;
+			}
+			return false;
+		},
+
 		async authenticate(tokens, uniqueId) {
 			this.isAuthenticated = true;
 			useCookie('authorization', {
@@ -28,60 +55,62 @@ export const useUserStore = defineStore('user', {
 			useCookie('x-client-id', {
 				maxAge: 60 * 60 * 24 * 7
 			}).value = uniqueId;
-			localStorage.setItem('x-client-id', uniqueId);
 		},
 		async logout() {
 			// Clear tokens from cookies
-			const result = await $fetch('/api/access/logout');
-			if (result.code !== 500) {
-				this.isAuthenticated = false;
-				useCookie('authorization', { maxAge: -1 }).value = null;
-				useCookie('x-rtoken-id', { maxAge: -1 }).value = null;
-				useCookie('x-client-id', { maxAge: -1 }).value = null;
-				this.isAuthenticated = false;
-				this.profile = {};
+			this.isAuthenticated = false;
 
-				navigateTo('/');
-			}
+			this.isAuthenticated = false;
+			this.profile = {};
+			await $fetch('/api/access/logout', {
+				method: 'POST'
+			});
+			useCookie('authorization', { maxAge: -1 }).value = null;
+			useCookie('x-rtoken-id', { maxAge: -1 }).value = null;
+			useCookie('x-client-id', { maxAge: -1 }).value = null;
+			navigateTo('/');
+			return true;
 		},
 
 		async refreshCookie() {
-			let req = await $fetch('/api/access/refresh');
+			let req = await $fetch('/api/access/refresh', {
+				method: 'POST'
+			});
 			if (req.metadata) {
 				const { tokens, uniqueId } = req.metadata;
 				await this.authenticate(tokens, uniqueId);
-			} else if (req.code === 401 && this.isAuthenticated) {
+				return true;
+			} else if (req.code === 401) {
 				this.isOverLogout = true;
 				this.logout();
-			} else if (req.code == 429) {
-				setTimeout(() => {
-					this.refreshCookie();
-				}, 60000);
-			} else {
-				this.isAuthenticated = false;
-				this.logout();
+				return false;
 			}
-			// else if(this.isOverLogout){
-			// 	this.isOverLogout = false;
-			// 	await this.logout();
-			// }
+	
 		},
 		async verify() {
-			let req = await $fetch('/api/access/verify');
+			let req = await $fetch('/api/access/verify', {
+				method: 'POST'
+			});
 			if (req.metadata) {
+				this.profile = req.metadata;
 				this.isAuthenticated = true;
 				return true;
 			} else if (req.code === 401) {
-				await this.refreshCookie();
+				const reslut = await this.refreshCookie();
+				if (reslut) {
+					await this.verify();
+				}
 				await this.verify();
 			}
 			return false;
 		},
 		async getinfo() {
-			let req = await $fetch('/api/user/info');
+			let req = await $fetch('/api/user/info', {
+				method: 'POST'
+			});
 			if (req.metadata) {
 				this.profile = req.metadata;
-				this.profile.avatar = this.profile.avatar || '/avatar.jpg';
+
 				this.isAuthenticated = true;
 				return true;
 			} else if (req.code === 403) {
@@ -89,11 +118,11 @@ export const useUserStore = defineStore('user', {
 				return false;
 			} else if (req.code === 401) {
 				await this.refreshCookie();
-				await this.getinfo();
+				
 			}
 			return false;
 		},
-		
+
 		checkAuth() {
 			this.isAuthenticated = true;
 		}

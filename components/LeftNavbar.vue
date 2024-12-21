@@ -2,14 +2,14 @@
 
 <template>
 	<div
-		class="navigation bg-sky-300 dark:bg-black dark:border-black border-s-[10px]"
+		class="navigation bg-sky-300  dark:bg-black dark:border-black border-s-[10px] border-sky-300"
 		:class="isActive ? 'active' : ''">
 		<ul>
 			<li>
 				<nuxt-link to="/profile">
 					<span class="icon"
 						><img
-							:src="user.profile.avatar"
+							:src="user.profile.avatar||'/avatar.jpg'"
 							class="rounded-full h-[60px] w-[60px]"
 							alt=""
 					/></span>
@@ -17,7 +17,7 @@
 				</nuxt-link>
 			</li>
 			<li v-for="nav in navList">
-				<nuxt-link :to="'/admin' + nav.link" >
+				<nuxt-link :to="'/admin' + nav.link">
 					<span class="icon"><Icon :name="nav.icon" /></span>
 					<span class="title capitalize">{{ nav.title }}</span>
 				</nuxt-link>
@@ -30,7 +30,7 @@
 			</li>
 		</ul>
 		<div
-			class="toggle  shadow-slate-100  bg-white"
+			class="toggle shadow-slate-100 bg-white"
 			@click="isActive = !isActive"
 			:class="isActive ? 'active' : ''"></div>
 	</div>
@@ -61,6 +61,11 @@
 			icon: 'eos-icons:role-binding-outlined',
 			title: 'roles',
 			link: '/roles'
+		},
+		{
+			icon: 'oui:token-module',
+			title: 'Module',
+			link: '/module'
 		}
 	]);
 </script>
@@ -77,7 +82,7 @@
 		width: 80px;
 		min-height: 100vh;
 
-		/* border-left: 10px solid #287bff; */
+		
 		overflow: hidden;
 		box-shadow: 15px 15px 25px rgba(0, 0, 0, 0.05);
 		transition: 0.5s;

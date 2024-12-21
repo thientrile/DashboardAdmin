@@ -13,7 +13,7 @@
 
 				<div class="sm:w-[80%] xs:w-[90%] mx-auto flex">
 					<img
-						:src="user.profile.avatar"
+						:src="user.profile.avatar||'/avatar.jpg'"
 						alt="User Profile"
 						class="rounded-md lg:w-[12rem] lg:h-[12rem] md:w-[10rem] md:h-[10rem] sm:w-[8rem] sm:h-[8rem] xs:w-[7rem] xs:h-[7rem] outline outline-2 outline-offset-2 outline-blue-500 relative lg:bottom-[5rem] sm:bottom-[4rem] xs:bottom-[3rem]" />
 

@@ -17,11 +17,11 @@
 	import isOverlayPermission from './components/isOverlayPermission.vue';
 	onMounted(async () => {
 		try {
-			if (!!useCookie('x-client-id').value && !user.isAuthenticated) {
+			if (useCookie('x-client-id').value) {
 				await user.verify();
 			}
 		} catch (error) {
-			user.logout();
+			await user.logout();
 		}
 	});
 </script>

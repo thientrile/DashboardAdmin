@@ -1,7 +1,9 @@
 <!-- @format -->
 
 <template>
-	<nav class="bg-sky-800 dark:bg-gray-800" aria-label="Global">
+	<nav
+		class="bg-sky-800 dark:bg-gray-800"
+		aria-label="Global">
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
 				<div class="flex items-center">
@@ -69,7 +71,7 @@
 									<span class="sr-only">Open user menu</span>
 									<img
 										class="size-8 rounded-full"
-										:src="user.profile.avatar"
+										:src="user.profile.avatar || '/avatar.jpg'"
 										alt="" />
 								</button>
 							</div>
@@ -204,7 +206,7 @@
 					<div class="shrink-0">
 						<img
 							class="size-10 rounded-full"
-							:src="user.profile.avatar"
+							:src="user.profile.avatar || '/avatar.jpg'"
 							alt="" />
 					</div>
 					<div class="ml-3">
@@ -266,14 +268,14 @@
 	import { ref } from 'vue';
 	import { useUserStore } from '~/store/user.js';
 	const user = useUserStore();
-	watch(
-		() => user.isAuthenticated,
-		async () => {
-			if (user.isAuthenticated) {
-				await user.getinfo();
-			}
-		}
-	);
+	// watch(
+	// 	() => user.isAuthenticated,
+	// 	async () => {
+	// 		if (user.isAuthenticated) {
+	// 			await user.getinfo();
+	// 		}
+	// 	}
+	// );
 
 	const currentPage = useRoute().path.split('/')[1];
 	const isMenuOpen = ref(false);

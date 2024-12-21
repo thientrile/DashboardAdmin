@@ -1,4 +1,5 @@
 /** @format */
+import crypto from 'node:crypto';
 export default defineEventHandler(async (event) => {
 	try {
 		const config = useRuntimeConfig();
@@ -6,6 +7,11 @@ export default defineEventHandler(async (event) => {
 		const body = await readBody(event);
 
 		const queryString = new URLSearchParams(query).toString();
+		const timestamp = new Date().getTime();
+		const hmacSignature = crypto
+			.createHmac('sha256', config.app.secretKey)
+			.update(timestamp.toString() + JSON.stringify(body||{}))
+			.digest('hex');
 		const url = `${config.app.apiUrl}/admin/rbac/role/_addGrants?${queryString}`;
 		const response = await $fetch(url, {
 			method: 'PATCH',
@@ -13,7 +19,9 @@ export default defineEventHandler(async (event) => {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,
 				'x-client-id': getCookie(event, 'x-client-id'),
-				authorization: getCookie(event, 'authorization')
+				authorization: getCookie(event, 'authorization'),
+				'x-timestamp': timestamp,
+				'x-hmac-signature': hmacSignature
 			},
 			body: JSON.stringify(body)
 		});

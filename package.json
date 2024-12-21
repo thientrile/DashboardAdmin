@@ -12,10 +12,11 @@
   "dependencies": {
     "@nuxt/icon": "^1.8.1",
     "@nuxt/ui": "2.20.0",
-   
     "@pinia/nuxt": "^0.7.0",
     "@vite-pwa/nuxt": "^0.10.6",
+    "date-fns": "^4.1.0",
     "nuxt": "^3.14.1592",
+    "v-calendar": "^3.1.2",
     "vue": "latest",
     "vue-router": "latest"
   },

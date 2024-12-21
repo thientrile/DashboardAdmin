@@ -180,7 +180,7 @@
 							<button
 								v-show="!item.permission.isRoots"
 								@click="deleteGrant(item._id, idx)"
-								class="ring-red-500 ring-2 text-white min-w-[50px] py-1.5 px-2 rounded-sm flex justify-center items-center"
+								class="ring-red-500 ring-2 dark:text-white min-w-[50px] py-1.5 px-2 rounded-sm flex justify-center items-center"
 								:disable="item.isLoading">
 								<span v-if="item.isLoading">
 									Deleting <Icon name="line-md:loading-loop" />

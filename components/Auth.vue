@@ -36,14 +36,14 @@
 				type="text"
 				id="firstname"
 				name="firstname"
+				placeholder="Enter your first name"
 				autocomplete="given-name"
-			
 				v-model="firstName"
 				class="block w-full py-1.5 rounded-md border-2 focus-visible:border-sky-300"
 				:required="!isLogin" />
 		</div>
 		<div
-			class="mt-2 min-w-[50%]"
+			class="mt-2"
 			v-show="!isLogin">
 			<label
 				for="lastname"
@@ -51,28 +51,29 @@
 				>Last name <span class="text-red-500"> * </span></label
 			>
 			<input
-			
 				type="text"
 				id="lastname"
 				name="lastname"
+				placeholder="Enter your last name"
 				autocomplete="family-name"
 				v-model="lastName"
 				:required="!isLogin"
 				class="block w-full rounded-md border-2 py-1.5 focus-visible:border-sky-300" />
 		</div>
-
-		<div class="mt-2 min-w-[50%]">
+		<div
+			class="mt-2"
+			v-if="!isLogin">
 			<label
 				for="email"
 				class="font-bold"
-				>{{ isLogin ? 'Username/email/phonenumber' : 'Email'
-				}}<span class="text-red-500"> * </span></label
+				>Email address <span class="text-red-500"> * </span></label
 			>
 			<input
-				:type="isLogin ? 'text' : 'email'"
-				:id="isLogin ? 'username' : 'email'"
-				:name="isLogin ? 'username' : 'email'"
-				:autocomplete="isLogin ? 'username' : 'email'"
+				type="email"
+				id="email"
+				name="email"
+				placeholder="Enter your email address"
+				autocomplete="email"
 				v-model="email"
 				required
 				class="block w-full rounded-md border-2 py-1.5 focus-visible:border-sky-300"
@@ -80,15 +81,36 @@
 			<span
 				v-show="isEmailError"
 				class="text-red-500"
-				>{{
-					isLogin
-						? 'Incorrect email or password'
-						: 'This email is already in use'
-				}}</span
+				>This email is already in use</span
 			>
 		</div>
 		<div
-			class="mt-2 grid grid-cols-3 gap-3"
+			class="mt-2"
+			v-else>
+			<label
+				for="username"
+				class="font-bold">
+				<span>Username</span>
+				<span class="text-red-500"> * </span>
+			</label>
+			<input
+				type="text"
+				id="username"
+				name="username"
+				placeholder="Enter your username or phone number or email"
+				autocomplete="username"
+				v-model="username"
+				required
+				class="block w-full rounded-md border-2 py-1.5 focus-visible:border-sky-300"
+				@input="isEmailError = false" />
+			<span
+				v-show="isEmailError"
+				class="text-red-500"
+				>Incorrect email or password</span
+			>
+		</div>
+		<div
+			class="mt-2 flex"
 			v-show="!isLogin">
 			<div class="">
 				<label
@@ -96,18 +118,11 @@
 					class="font-bold"
 					>Sex</label
 				>
-				<select
-					v-model="sex"
+				<USelect
+					id="sex"
 					name="sex"
-					class="block border-2 rounded-md py-1.5 w-full">
-					<option
-						selected
-						value="0">
-						Male
-					</option>
-					<option value="1">Female</option>
-					<option value="2">Order</option>
-				</select>
+					v-model="sex"
+					:options="['Male', 'Female', 'Order']" />
 			</div>
 			<div class="ms-2">
 				<label
@@ -115,17 +130,29 @@
 					class="font-bold">
 					Date of birth <span class="text-red-500">*</span>
 				</label>
-				<input
-					type="date"
-					autocomplete="bday"
-					name="dateOfBirth"
-					id="dateOfBirth"
-					v-model="dateOfBirth"
-					class="block rounded-md border-2 py-1.5 focus-visible:border-sky-300"
-					:required="!isLogin" />
+
+				<UPopover :popper="{ placement: 'bottom-start' }">
+					<UButton
+						icon="i-heroicons-calendar-days-20-solid"
+						:label="format(dateOfBirth, 'yyyy-MM-dd')" />
+
+					<template #panel="{ close }">
+						<DatePicker
+							v-model="dateOfBirth"
+							:is-required="!isLogin"
+							@close="close" />
+					</template>
+				</UPopover>
+				<span class="text-red-500">
+					{{
+						dateOfBirth > new Date()
+							? 'Date of birth must be less than the current date'
+							: ''
+					}}
+				</span>
 			</div>
 		</div>
-		<div class="mt-2 min-w-[50%]">
+		<div class="mt-2">
 			<label
 				for="password"
 				class="font-bold">
@@ -135,6 +162,7 @@
 				type="password"
 				id="password"
 				name="password"
+				placeholder="Enter your password"
 				:autocomplete="isLogin ? 'current-password' : 'new-password'"
 				v-model="password"
 				required
@@ -144,7 +172,7 @@
 			<span class="text-red-500">{{ messagePwsError }}</span>
 		</div>
 		<div
-			class="mt-2 min-w-[50%]"
+			class="mt-2"
 			v-show="!isLogin">
 			<label
 				for="re-password"
@@ -155,6 +183,7 @@
 				type="password"
 				id="re-password"
 				name="re-password"
+				placeholder="Re-enter your password"
 				v-model="confirmPassword"
 				:required="!isLogin"
 				@change="isRepassword()"
@@ -173,22 +202,23 @@
 				:required="!isLogin" />
 			<span class="ms-2 text-sm"
 				>I agree to the terms of privacy
-				<a tabindex="-1"
+				<a
+					tabindex="-1"
 					href="#"
 					class="text-red-500 underline"
 					>license</a
 				></span
 			>
 		</div>
-		<div v-else >
+		<div v-else>
 			<a
-			 tabindex="-1"
+				tabindex="-1"
 				href="/auth/forgot-password"
 				class="block text-end text-sm text-red-500 underline"
 				>Forgot password?</a
 			>
 		</div>
-		<div class="mt-2 min-w-[50%]">
+		<div class="mt-2">
 			<button
 				:disabled="isLoading"
 				type="submit"
@@ -201,8 +231,7 @@
 			</button>
 		</div>
 		<div class="my-2 w-full flex justify-center">
-			<span
-			class="w-[15em] bg-gray-500 h-[1px]"></span>
+			<span class="w-[15em] bg-gray-500 h-[1px]"></span>
 		</div>
 		<button
 			type="button"
@@ -217,9 +246,11 @@
 </template>
 
 <script setup>
+	import DatePicker from '~/components/DatePicker.vue';
+	import { format } from 'date-fns';
 	import { useUserStore } from '~/store/user.js';
 	const user = useUserStore();
-
+	const username = ref('');
 	import { ref } from 'vue';
 	const isLoading = ref(false);
 	const isLogin = ref(true);
@@ -233,7 +264,7 @@
 	const confirmPassword = ref('');
 	const isEmailError = ref(false);
 	const sex = ref('0');
-	const dateOfBirth = ref('');
+	const dateOfBirth = ref(new Date(-1));
 	const isvalidPassword = () => {
 		isPwsError.value = false;
 		messagePwsError.value = '';
@@ -280,37 +311,29 @@
 		if (!isLogin.value && isLoading.value) {
 			isLoading.value =
 				!isRepwsError.value && new Date(dateOfBirth.value) < Date.now();
+			const body = {
+				name: firstName.value + ' ' + lastName.value,
+				email: email.value,
+				password: password.value,
+				sex: sex.value,
+				date_of_birth: new Date(dateOfBirth.value)
+			};
 
-			req = await $fetch('api/access/register', {
-				method: 'POST',
-				body: {
-					name: firstName.value + ' ' + lastName.value,
-					email: email.value,
-					password: password.value,
-					sex: sex.value,
-					date_of_birth: new Date(dateOfBirth.value)
-				}
-			});
+			req = await user.register(body);
+			isLoading.value = false;
 		} else if (isLogin.value && isLoading.value) {
-			req = await $fetch('api/access/login', {
-				method: 'POST',
-				body: {
-					username: email.value,
-					password: password.value
-				}
-			});
+			const body = {
+				username: username.value,
+				password: password.value
+			};
+			req = await user.login(body);
+			isLoading.value = false;
 		}
-		if (req) {
-			if (req.status == 200) {
-				const { tokens, uniqueId } = req.metadata;
-
-				await user.authenticate(tokens, uniqueId);
-				navigateTo('/');
-			} else {
-				isEmailError.value = true;
-			}
-		}
-
 		isLoading.value = false;
+		if (req) {
+			isEmailError.value = false;
+			navigateTo('/');
+		}
+		isEmailError.value = true;
 	};
 </script>

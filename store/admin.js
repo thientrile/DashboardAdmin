@@ -3,7 +3,6 @@
 import { defineStore } from 'pinia';
 import { useUserStore } from './user';
 import { useGeneralStore } from './general';
-import { randomNunmber } from '~/util';
 
 export const useAdminStore = defineStore('admin', {
 	state: () => ({
@@ -48,7 +47,6 @@ export const useAdminStore = defineStore('admin', {
 				});
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					this.createSrc(name, description);
 				} else if (req.code == 403) {
 					useUserStore().isPermission = true;
 				} else if (req.metadata) {
@@ -70,7 +68,7 @@ export const useAdminStore = defineStore('admin', {
 
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					this.createRole(body);
+					// this.createRole(body);
 				} else if (req.code == 403) {
 					useUserStore().isPermission = true;
 				} else if (req.metadata) {
@@ -90,7 +88,7 @@ export const useAdminStore = defineStore('admin', {
 				useGeneralStore().IsOverLoading = false;
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					this.getAllListRoles();
+					// this.getAllListRoles();
 				} else if (req.code == 403) {
 					useUserStore().isPermission = true;
 				} else if (req.metadata) {
@@ -114,7 +112,7 @@ export const useAdminStore = defineStore('admin', {
 				});
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					this.deleteGrantToRole(body);
+					// this.deleteGrantToRole(body);
 				} else if (req.code == 403) {
 					useUserStore().isPermission = true;
 				} else if (req.metadata) {
@@ -135,7 +133,7 @@ export const useAdminStore = defineStore('admin', {
 
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					this.addGrantToRole(body);
+					// this.addGrantToRole(body);
 				} else if (req.code == 403) {
 					useUserStore().isPermission = true;
 				} else if (req.metadata) {
@@ -160,7 +158,7 @@ export const useAdminStore = defineStore('admin', {
 
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					this.setGrantToRole(body);
+					// this.setGrantToRole(body);
 				} else if (req.code == 403) {
 					useUserStore().isPermission = true;
 				} else if (req.metadata) {
@@ -182,7 +180,7 @@ export const useAdminStore = defineStore('admin', {
 
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					this.deleteRole(body);
+					// this.deleteRole(body);
 				} else if (req.code == 403) {
 					useUserStore().isPermission = true;
 				} else if (req.metadata) {
@@ -204,7 +202,7 @@ export const useAdminStore = defineStore('admin', {
 
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					this.deleteRole(body);
+					// this.deleteRole(body);
 				} else if (req.code == 403) {
 					useUserStore().isPermission = true;
 				} else if (req.metadata) {
@@ -225,16 +223,15 @@ export const useAdminStore = defineStore('admin', {
 
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					this.deleteRole(body);
+					// this.deleteRole(body);
 				} else if (req.code == 403) {
 					useUserStore().isPermission = true;
 				} else if (req.metadata) {
 					return true;
 				}
 			} catch (e) {
-				setTimeout(() => {
-					this.SyncSrc();
-				}, randomNunmber(1000, 10000));
+				console.error(e);
+				return false;
 			}
 		}
 	},

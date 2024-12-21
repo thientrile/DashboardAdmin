@@ -7,7 +7,7 @@
 		class="fixed top-0 h-screen w-screen flex justify-center backdrop-blur-sm items-center z-50 bg-white/30">
 		<div class="flex flex-col justify-between">
 			<div
-				class="w-[500px] min-h-[200px]  shadow-xl py-1.5 rounded-md flex flex-col justify-between px-1.5">
+				class="w-[500px] min-h-[200px] shadow-xl py-1.5 rounded-md flex flex-col justify-between px-1.5">
 				<div class="flex justify-center">
 					<Icon
 						name="clarity:error-solid"
@@ -15,7 +15,6 @@
 				</div>
 				<div>
 					<h1 class="text-3xl text-center">Login time expired</h1>
-					
 				</div>
 				<div class="flex justify-center sticky float-end">
 					<button
@@ -36,6 +35,5 @@
 	const seconds = ref(3);
 	const buttonHandler = () => {
 		user.isOverLogout = false;
-		user.logout();
 	};
 </script>
