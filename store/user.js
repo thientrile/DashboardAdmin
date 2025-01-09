@@ -1,5 +1,4 @@
 /** @format */
-
 import { defineStore } from 'pinia';
 export const useUserStore = defineStore('user', {
 	state: () => ({
@@ -9,8 +8,7 @@ export const useUserStore = defineStore('user', {
 			name: '',
 			phone: '',
 			role: '',
-			id: '',
-			avatar: '/avatar.jpg'
+			id: ''
 		},
 		isOverLogout: false,
 		isPermission: false
@@ -22,7 +20,6 @@ export const useUserStore = defineStore('user', {
 				method: 'POST',
 				body: JSON.stringify(body)
 			});
-			console.log('🚀 ~ login ~ req:', req);
 
 			if (req.metadata) {
 				const { tokens, uniqueId } = req.metadata;
@@ -36,7 +33,7 @@ export const useUserStore = defineStore('user', {
 				method: 'POST',
 				body: JSON.stringify(body)
 			});
-			if (req.status == 200) {
+			if (req.metadata) {
 				const { tokens, uniqueId } = req.metadata;
 				await this.authenticate(tokens, uniqueId);
 				return true;
@@ -57,19 +54,25 @@ export const useUserStore = defineStore('user', {
 			}).value = uniqueId;
 		},
 		async logout() {
-			// Clear tokens from cookies
-			this.isAuthenticated = false;
-
-			this.isAuthenticated = false;
-			this.profile = {};
-			await $fetch('/api/access/logout', {
+			const req = await $fetch('/api/access/logout', {
 				method: 'POST'
 			});
-			useCookie('authorization', { maxAge: -1 }).value = null;
-			useCookie('x-rtoken-id', { maxAge: -1 }).value = null;
-			useCookie('x-client-id', { maxAge: -1 }).value = null;
-			navigateTo('/');
-			return true;
+
+			if (req.code === 401) {
+				this.refreshCookie();
+				return false;
+			}
+			if (req.metadata) {
+				// Clear tokens from cookies
+				this.isAuthenticated = false;
+				this.isAuthenticated = false;
+				this.profile = {};
+				useCookie('authorization', { maxAge: -1 }).value = null;
+				useCookie('x-rtoken-id', { maxAge: -1 }).value = null;
+				useRouter().push('/auth');
+				useCookie('x-client-id', { maxAge: -1 }).value = null;
+				return true;
+			}
 		},
 
 		async refreshCookie() {
@@ -81,16 +84,30 @@ export const useUserStore = defineStore('user', {
 				await this.authenticate(tokens, uniqueId);
 				return true;
 			} else if (req.code === 401) {
-				this.isOverLogout = true;
-				this.logout();
+				this.isAuthenticated = false;
+				this.isAuthenticated = false;
+				this.profile = {};
+				useCookie('authorization', { maxAge: -1 }).value = null;
+				useCookie('x-rtoken-id', { maxAge: -1 }).value = null;
+				useCookie('x-client-id', { maxAge: -1 }).value = null;
+				useRouter().push('/auth');
 				return false;
 			}
-	
 		},
 		async verify() {
-			let req = await $fetch('/api/access/verify', {
-				method: 'POST'
-			});
+			if (!useCookie('x-client-id').value) {
+				this.isAuthenticated = false;
+				this.isAuthenticated = false;
+				this.profile = {};
+				useCookie('authorization', { maxAge: -1 }).value = null;
+				useCookie('x-rtoken-id', { maxAge: -1 }).value = null;
+				useCookie('x-client-id', { maxAge: -1 }).value = null;
+				useRouter().push('/auth');
+				return false;
+			}
+
+			let req = await $fetch('/api/access/verify')
+		
 			if (req.metadata) {
 				this.profile = req.metadata;
 				this.isAuthenticated = true;
@@ -100,9 +117,8 @@ export const useUserStore = defineStore('user', {
 				if (reslut) {
 					await this.verify();
 				}
-				await this.verify();
+				return false;
 			}
-			return false;
 		},
 		async getinfo() {
 			let req = await $fetch('/api/user/info', {
@@ -118,7 +134,6 @@ export const useUserStore = defineStore('user', {
 				return false;
 			} else if (req.code === 401) {
 				await this.refreshCookie();
-				
 			}
 			return false;
 		},

@@ -8,12 +8,12 @@ export default defineEventHandler(async (event) => {
 		const timestamp = new Date().getTime();
 		const hmacSignature = crypto
 			.createHmac('sha256', config.app.secretKey)
-			.update(timestamp.toString() + JSON.stringify(body||{}))
+			.update(timestamp.toString() + JSON.stringify(body || {}))
 			.digest('hex');
 		const queryString = new URLSearchParams(query).toString();
-		const url = `${config.app.apiUrl}/admin/rbac/_setGrants?${queryString}`;
+		const url = `${config.app.apiUrl}/admin/rbac/_delgrant?${queryString}`;
 		const response = await $fetch(url, {
-			method: 'PUT',
+			method: 'delete',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,
@@ -27,7 +27,6 @@ export default defineEventHandler(async (event) => {
 		// Return the exact response structure received
 		return response;
 	} catch (e) {
-
 		return e.data;
 	}
 });

@@ -4,16 +4,16 @@ export default defineEventHandler(async (event) => {
 	try {
 		const config = useRuntimeConfig();
 		const query = getQuery(event);
-		const body = await readBody(event);
 		const timestamp = new Date().getTime();
+		const body = await readBody(event);
 		const hmacSignature = crypto
 			.createHmac('sha256', config.app.secretKey)
-			.update(timestamp.toString() + JSON.stringify(body||{}))
+			.update(timestamp.toString() + JSON.stringify(body || {}))
 			.digest('hex');
 		const queryString = new URLSearchParams(query).toString();
-		const url = `${config.app.apiUrl}/admin/rbac/_setGrants?${queryString}`;
+		const url = `${config.app.apiUrl}/admin/resource/_delete?${queryString}`;
 		const response = await $fetch(url, {
-			method: 'PUT',
+			method: 'delete',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,
@@ -27,7 +27,6 @@ export default defineEventHandler(async (event) => {
 		// Return the exact response structure received
 		return response;
 	} catch (e) {
-
 		return e.data;
 	}
 });

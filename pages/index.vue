@@ -1,14 +1,183 @@
 <!-- @format -->
+<script setup>
+	import Main from '@/layouts/main.vue';
+
+	definePageMeta({ middleware: 'auth' });
+</script>
 
 <template>
-<MainLayout>
-
-	dfsf
-</MainLayout>
+	<Main>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome to the admin dashboard!</p>
+		</div>
+	</Main>
 </template>
-
-<script setup>
-	import MainLayout from '~/layouts/Main.vue';
-
-
-</script>

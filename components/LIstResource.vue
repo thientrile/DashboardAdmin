@@ -1,183 +1,348 @@
 <!-- @format -->
 
 <template>
-	<div class="min-w-[80vw] p-2 border-t-2 dark:t">
-		<div class="flex justify-between">
-			<div class="flex gap-2">
-				<button
-					type="button"
-					@click="
-						currentPage--;
-						handleChange();
-					"
-					class="p-1.5 rounded-sm"
-					:disabled="currentPage - 1 <= 0">
-					<Icon name="bx:left-arrow" />
-				</button>
-				<span class="p-1.5">page: {{ currentPage }}</span>
-				<button
-					type="button"
-					:disabled="admin.resources.length < limit"
-					@click="
-						currentPage++;
-						handleChange();
-					"
-					class="p-1.5 rounded-sm">
-					<Icon name="bx:right-arrow" />
-				</button>
-
-				<label
-					for="limit"
-					class="border-inherit p-1.5 rounded-s-md"
-					>Limit</label
-				>
-				<input
-					class="w-[50px] rounded-md border-2 py-1.5 focus-visible:border-sky-300 dark:text-white"
-					type="number"
-					v-model="limit"
-					id="limit"
-					max="100"
-					min="1"
-					@change="
-						currentPage = 1;
-						handleChange();
-					" />
+	<div
+		id="seach"
+		class="sticky top-0 flex justify-between text-xs z-50 bg-white dark:bg-black shadow-sm p-3 rounded-2xl">
+		<div class="flex items-center">
+			<UInput
+				v-model="search.keyword"
+				placeholder="Search"
+				icon="ic:baseline-search"
+				class="w-full"
+				:loading="search.loading"
+				@change="getSrcformApi()" />
+		</div>
+		<div class="flex gap-2 justify-between items-center">
+			<label for="limit">
+				<span class="font-bold">Limit</span>
+			</label>
+			<UInputNumber
+				class="w-25"
+				id="limit"
+				lablel="limit"
+				:min="1"
+				:max="admin.options.size"
+				@change="
+					page = 1;
+					getSrcformApi();
+				"
+				v-model="limit" />
+			<span class="font-bold">/</span>
+			<label for="page">
+				<span class="font-bold">Page</span>
+			</label>
+			<UInputNumber
+				class="w-25"
+				id="page"
+				lablel="page"
+				:min="1"
+				:max="Math.ceil(admin.options.size / limit)"
+				@change="getSrcformApi()"
+				v-model="page" />
+			<UTooltip text="Sync on system">
+				<UButton
+					icon="material-symbols:refresh-rounded"
+					:loading="isLoading"
+					@click="refresh()"
+					color="neutral"
+					variant="subtle" />
+			</UTooltip>
+			<div v-show="general.actions.create">
+				<UTooltip text="Add new resource">
+					<UButton
+						icon="material-symbols:add"
+						color="primary"
+						variant="subtle"
+						@click="srcNew.isShow = !srcNew.isShow" />
+				</UTooltip>
 			</div>
-			<div class="flex gap-2">
-				<label
-					for="search"
-					class="border-current p-1.5 rounded-s-md"
-					>Search</label
-				>
-				<input
-					class="rounded-md border-2 py-1.5 focus-visible:border-sky-300"
-					type="text"
-					v-model="search"
-					id="search"
-					placeholder="Enter name resource"
-					@change="
-						currentPage = 1;
-						handleChange();
-					" />
+			<div v-show="general.actions.update">
+				<UTooltip text="Sync on system">
+					<UButton
+						icon="material-symbols:cloud-outline"
+						:loading="syncSrcLoading"
+						@click="handleSyncSrc()"
+						color="neutral"
+						variant="subtle" />
+				</UTooltip>
 			</div>
 		</div>
-		<div
-			v-if="listSrc.length > 0"
-			class="max-h-[300px] min-h-[150px] overflow-hidden overflow-y-auto">
-			<table
-				class="w-full cursor-pointer w-fulborder-collapse border border-slate-400">
-				<thead class="sticky">
-					<tr>
-						<th class="border border-slate-300">Name</th>
-						<th class="border border-slate-300">Description</th>
-						<th
-							class="border border-slate-300"
-							v-show="check">
-							Actions
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr
-						class="cursor-pointer hover:bg-gray-500"
-						:class="admin.selectSrc == item.slug ? 'bg-gray-500' : ''"
-						v-for="(item, index) in listSrc"
-						:key="index">
-						<td
-							class="border border-slate-300"
-							@click="admin.selectSrc = item.slug">
-							{{ item.name }}
-						</td>
-						<td
-							class="border border-slate-300"
-							@click="admin.selectSrc = item.slug">
+	</div>
+	<div
+		class="m-2 mt-2 p-5 bg-white dark:bg-black shadow-2xl rounded-2xl flex flex-col gap-5">
+		<table class="border-collapse border border-slate-300 w-full">
+			<thead>
+				<tr>
+					<th class="border border-slate-300 ...">Icon</th>
+					<th class="border border-slate-300 ...">Name</th>
+					<th class="border border-slate-300 ...">Description</th>
+					<th class="border border-slate-300 ... w-[10px]">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr
+					id="newSrc"
+					v-show="srcNew.isShow && general.actions.create">
+					<td class="border border-slate-300">
+						<div class="flex justify-between">
+							<div>
+								<UIcon :name="srcNew.icon" />
+							</div>
+							<div>
+								<Iconify
+									:search="srcNew.name"
+									v-model:icon="srcNew.icon" />
+							</div>
+						</div>
+					</td>
+					<td class="border border-slate-300">
+						<UInput
+							class="w-full"
+							v-model="srcNew.name"
+							placeholder="Enter New Name Resource"
+							:color="srcNew.name.length == 0 ? 'error' : ''" />
+					</td>
+					<td class="border border-slate-300">
+						<UInput
+							class="w-full"
+							v-model="srcNew.description"
+							placeholder="Enter New Description" />
+					</td>
+					<td class="border border-slate-300">
+						<div class="flex justify-center gap-2">
+							<UTooltip text="Add New Resource">
+								<UButton
+									:loading="srcNew.loading"
+									icon="material-symbols:add-rounded"
+									type="button"
+									@click="handleAdd"
+									color="primary"
+									variant="outline" />
+							</UTooltip>
+							<UTooltip text="Clear">
+								<UButton
+									@click="handleClearDataforNewSrc"
+									icon="mdi:clear-outline"
+									color="error"
+									variant="outline" />
+							</UTooltip>
+						</div>
+					</td>
+				</tr>
+				<tr
+					@click="handleClearDataforNewSrc()"
+					v-for="(item, idx) in listResource"
+					:key="item.id">
+					<td class="border border-slate-300">
+						<div class="flex justify-between">
+							<div>
+								<UIcon :name="item.icon" />
+							</div>
+							<div
+								@click="item.isChange = true"
+								v-show="general.actions.update">
+								<Iconify
+									:search="item.name"
+									v-model:icon="item.icon" />
+							</div>
+						</div>
+					</td>
+					<td class="border border-slate-300 ...">{{ item.name }}</td>
+					<td
+						class="border border-slate-300"
+						@dblclick="item.isChange = true">
+						<span v-if="!item.isChange">
 							{{ item.description }}
-						</td>
-						<td
-							class="border border-slate-300 flex w-full"
-							v-show="check && !item.isRoot">
-							<button
-								class="bg-red-500 rounded-md flex items-center justify-center p-1.5"
-								:disabled="item.isloading"
-								@click="delSrc(item.resourceId, index)">
-								<span
-									v-if="item.isloading"
-									class="flex items-center">
-									<span>Deleting</span>
-									<Icon name="line-md:loading-loop" />
-								</span>
-
-								<span
-									v-else
-									class="text-white rouned-md hover:ring-1"
-									>Delete</span
-								>
-							</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-
-		<div
-			v-else
-			class="flex border-inherit justify-center items-center backdrop-blur-md min-h-[5em] dark:text-white">
-			Empty
-		</div>
+						</span>
+						<UInput
+							v-else
+							:disabled="!item.isChange"
+							v-model="item.description"
+							class="w-full h-full" />
+					</td>
+					<td class="border border-slate-300">
+						<div class="flex justify-center gap-2">
+							<div v-show="item.isChange && general.actions.update">
+								<UTooltip text="Save Resource">
+									<UButton
+										:loading="item.loading"
+										color="primary"
+										variant="outline"
+										@click="handledSave(item, idx)"
+										icon="ic:baseline-save" />
+								</UTooltip>
+							</div>
+							<div v-show="!item.isRoot && general.actions.delete">
+								<UTooltip text="Delete Resource">
+									<UButton
+										color="error"
+										variant="outline"
+										@click="handleDelete(item.id, idx)"
+										:loading="item.loading"
+										icon="ic:baseline-delete" />
+								</UTooltip>
+							</div>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 </template>
 
 <script setup>
+	import Iconify from './Iconify.vue';
 	import { useAdminStore } from '~/store/admin';
+	import { useGeneralStore } from '~/store/general';
+	const general = useGeneralStore();
+	const isLoading = ref(false);
 	const admin = useAdminStore();
-	const listSrc = ref([]);
-	const search = ref('');
-	const currentPage = ref(1);
+	const listResource = ref([]);
 	const limit = ref(10);
-	const props = defineProps(['isActions']);
-	const { isActions } = toRefs(props);
-	const check = ref(isActions.value == 'true');
-	onMounted(async () => {
-		await admin.getSrc({ limit: limit.value, page: currentPage.value });
+	const page = ref(1);
+	const search = ref({
+		keyword: '',
+		loading: false
 	});
-	watch(
-		() => admin.resources,
-		() => {
-			const arrTemp = [];
-			for (let i in admin.resources) {
-				let objTemp = {};
-				objTemp = admin.resources[i];
-				objTemp.isloading = false;
-				arrTemp.push(objTemp);
-			}
-			listSrc.value = arrTemp;
-		}
-	);
-	const handleChange = async () => {
-		limit.value = limit.value == '' ? 10 : limit.value;
-		const checkData = admin.resources.filter((item) =>
-			item.name.toLowerCase().includes(search.value.toLowerCase())
-		);
 
-		if (checkData.length > 0 && search.value.length > 0) {
-			listSrc.value = checkData;
+	const toast = useToast();
+	const srcNew = ref({
+		name: '',
+		description: '',
+		icon: '',
+		loading: false,
+		isNew: false,
+		isError: false,
+		isShow: false
+	});
+	const refresh = async () => {
+		isLoading.value = true;
+		await admin.getSrc({
+			limit: limit.value,
+			page: page.value,
+			search: search.value.keyword
+		});
+		getListSrc();
+		isLoading.value = false;
+	};
+	onMounted(async () => {
+		await refresh();
+	});
+	const getSrcformApi = async () => {
+		search.value.loading = true;
+		await admin.getSrc({
+			limit: limit.value,
+			page: page.value,
+			search: search.value.keyword
+		});
+		search.value.loading = false;
+		getListSrc();
+	};
+	const getListSrc = () => {
+		const arr = [];
+		admin.resources.forEach((item) => {
+			let obj = {};
+			obj.name = item.name;
+			obj.createdAt = item.createdAt;
+			obj.id = item._id;
+			obj.isRoot = item.isRoot;
+			obj.description = item.description;
+			obj.icon = item.icon || '';
+			obj.loading = false;
+			obj.isChange = false;
+			arr.push(obj);
+		});
+		listResource.value = arr;
+	};
+	const handledSave = async (body, idx) => {
+		listResource.value[idx].loading = true;
+
+		// function save src
+
+		const result = await admin.updateSrc(body);
+		listResource.value[idx].loading = false;
+		listResource.value[idx].isChange = false;
+		if (result) {
+			toast.add({
+				title: 'Seccessfully',
+				description: 'The resource has been updated',
+				icon: 'mdi:success-bold',
+				color: 'success'
+			});
 		} else {
-			await admin.getSrc({
-				search: search.value,
-				limit: limit.value,
-				page: currentPage.value
+			toast.add({
+				title: 'Error',
+				description: 'Not Found resource',
+				icon: 'material-symbols:error-outline',
+				color: 'error'
 			});
 		}
 	};
-	const delSrc = async (id, idx) => {
-		listSrc.value[idx].isloading = true;
+	const handleAdd = async () => {
+		if (srcNew.value.name.length == 0) {
+			toast.add({
+				title: 'Error',
+				description: 'Please fill  the fields name',
+				icon: 'material-symbols:error-outline',
+				color: 'error'
+			});
+			return;
+		}
+
+		srcNew.value.loading = true;
+		// function add src
+		const body = {
+			name: srcNew.value.name,
+			description: srcNew.value.description,
+			icon: srcNew.value.icon
+		};
+		const result = await admin.createSrc(body);
+		srcNew.value.loading = false;
+		if (result) {
+			toast.add({
+				title: 'Seccessfully',
+				description: 'The new resource has been added',
+				icon: 'mdi:success-bold',
+				color: 'success'
+			});
+			getListSrc();
+			handleClearDataforNewSrc();
+		} else {
+			toast.add({
+				title: 'Error',
+				description: 'The name is already exist',
+				icon: 'material-symbols:error-outline',
+				color: 'error'
+			});
+			handleClearDataforNewSrc();
+		}
+	};
+	const handleDelete = async (id, idx) => {
+		listResource.value[idx].loading = true;
+		// function delete src
 		const body = {
 			resourceId: id
 		};
 		const result = await admin.deleteSrc(body);
-		listSrc.value[idx].isloading = false;
 		if (result) {
-			listSrc.value.splice(idx, 1);
+			listResource.value.splice(idx, 1);
 		}
+		listResource.value[idx].loading = false;
+	};
+	const handleClearDataforNewSrc = () => {
+		srcNew.value.name = '';
+		srcNew.value.description = '';
+		srcNew.value.isNew = false;
+		srcNew.value.loading = false;
+		srcNew.value.icon = '';
+		srcNew.value.isShow = false;
+	};
+	const syncSrcLoading = ref(false);
+	const handleSyncSrc = async () => {
+		syncSrcLoading.value = true;
+		await admin.SyncSrc();
+		await refresh();
+		syncSrcLoading.value = false;
 	};
 </script>

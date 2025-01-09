@@ -5,15 +5,16 @@ export default defineEventHandler(async (event) => {
 		const config = useRuntimeConfig();
 		const query = getQuery(event);
 		const body = await readBody(event);
+
+		const queryString = new URLSearchParams(query).toString();
 		const timestamp = new Date().getTime();
 		const hmacSignature = crypto
 			.createHmac('sha256', config.app.secretKey)
 			.update(timestamp.toString() + JSON.stringify(body||{}))
 			.digest('hex');
-		const queryString = new URLSearchParams(query).toString();
-		const url = `${config.app.apiUrl}/admin/rbac/_setGrants?${queryString}`;
+		const url = `${config.app.apiUrl}/admin/rbac/_addGrants?${queryString}`;
 		const response = await $fetch(url, {
-			method: 'PUT',
+			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,

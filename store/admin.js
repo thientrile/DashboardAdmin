@@ -11,70 +11,65 @@ export const useAdminStore = defineStore('admin', {
 		selectSrc: null,
 		selectRol: null,
 		isNewRole: false,
-		isEditRole: false
+		isEditRole: false,
+		options: {}
 	}),
 
 	actions: {
 		async getSrc({ page = 1, limit = 30, search = '' }) {
-			try {
-				const offset = (page - 1) * limit;
-				const query = { limit, offset, search };
-				const queryString = new URLSearchParams(query).toString();
-				const url = `/api/admin/rbac/get_resources?${queryString}`;
-				const request = await $fetch(url);
+			const offset = (page - 1) * limit;
+			const query = { limit, offset, search };
+			const queryString = new URLSearchParams(query).toString();
+			const url = `/api/admin/resource/get_all?${queryString}`;
+			const request = await $fetch(url);
+			console.log('🚀 ~ getSrc ~ request:', request);
 
-				if (request.metadata) {
-					this.selectSrc = null;
-					this.resources = request.metadata;
-				} else if (request.code == 403) {
-					useUserStore().isPermission = true;
-				} else if (request.code == 401) {
-					await useUserStore().refreshCookie();
-				}
-			} catch (e) {
-				console.error(e);
-				return false;
+			if (request.metadata) {
+				this.options = request.options;
+				this.selectSrc = null;
+				this.resources = request.metadata;
+			}
+			if (request.code == 403) {
+				useUserStore().isPermission = true;
+			}
+			if (request.code == 401) {
+				await useUserStore().refreshCookie();
 			}
 		},
-		async createSrc(name, description) {
-			try {
-				const req = await $fetch('/api/admin/rbac/post_resource', {
-					method: 'POST',
-					body: {
-						name,
-						description
-					}
-				});
-				if (req.code == 401) {
-					await useUserStore().refreshCookie();
-				} else if (req.code == 403) {
-					useUserStore().isPermission = true;
-				} else if (req.metadata) {
-					this.getSrc();
-					return true;
-				}
-				return false;
-			} catch (e) {
-				console.error(e);
-				return false;
+		async createSrc(body) {
+			const req = await $fetch('/api/admin/resource/create_resource', {
+				method: 'POST',
+				body
+			});
+			if (req.metadata) {
+				console.log('🚀 ~ createSrc ~ req.metadata:', req.metadata);
+				this.resources.unshift(req.metadata);
+				return true;
+			}
+			if (req.code == 401) {
+				await useUserStore().refreshCookie();
+			}
+			if (req.code == 403) {
+				useUserStore().isPermission = true;
 			}
 		},
 		async createRole(body) {
 			try {
-				const req = await $fetch('/api/admin/rbac/post_role', {
+				const req = await $fetch('/api/admin/role/create_role', {
 					method: 'POST',
 					body
 				});
-
-				if (req.code == 401) {
-					await useUserStore().refreshCookie();
-					// this.createRole(body);
-				} else if (req.code == 403) {
-					useUserStore().isPermission = true;
-				} else if (req.metadata) {
+				if (req.metadata) {
 					this.roles = req.metadata;
 					return true;
 				}
+				if (req.code == 401) {
+					await useUserStore().refreshCookie();
+				}
+				if (req.code == 403) {
+					useUserStore().isPermission = true;
+				}
+
 				return false;
 			} catch (e) {
 				console.error(e);
@@ -84,14 +79,16 @@ export const useAdminStore = defineStore('admin', {
 		async getAllListRoles() {
 			try {
 				useGeneralStore().IsOverLoading = true;
-				const req = await $fetch('/api/admin/rbac/get_roles');
+				const req = await $fetch('/api/admin/role/get_all');
 				useGeneralStore().IsOverLoading = false;
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					// this.getAllListRoles();
-				} else if (req.code == 403) {
+					return false;
+				}
+				if (req.code == 403) {
 					useUserStore().isPermission = true;
-				} else if (req.metadata) {
+				}
+				if (req.metadata) {
 					this.roles = req.metadata;
 					this.selectSrc = null;
 					this.selectRol =
@@ -105,23 +102,19 @@ export const useAdminStore = defineStore('admin', {
 			}
 		},
 		async deleteGrantToRole(body) {
-			try {
-				const req = await $fetch('/api/admin/rbac/patch_role', {
-					method: 'DELETE',
-					body
-				});
-				if (req.code == 401) {
-					await useUserStore().refreshCookie();
-					// this.deleteGrantToRole(body);
-				} else if (req.code == 403) {
-					useUserStore().isPermission = true;
-				} else if (req.metadata) {
-					return true;
-				}
+			const req = await $fetch('/api/admin/rbac/delete_grants', {
+				method: 'POST',
+				body
+			});
+			if (req.metadata) {
+				return true;
+			}
+			if (req.code == 401) {
+				await useUserStore().refreshCookie();
 				return false;
-			} catch (e) {
-				console.error(e);
-				return false;
+			}
+			if (req.code == 403) {
+				useUserStore().isPermission = true;
 			}
 		},
 		async addGrantToRole(body) {
@@ -133,10 +126,12 @@ export const useAdminStore = defineStore('admin', {
 
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					// this.addGrantToRole(body);
-				} else if (req.code == 403) {
+					return false;
+				}
+				if (req.code == 403) {
 					useUserStore().isPermission = true;
-				} else if (req.metadata) {
+				}
+				if (req.metadata) {
 					this.roles = req.metadata;
 					return true;
 				}
@@ -158,10 +153,12 @@ export const useAdminStore = defineStore('admin', {
 
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					// this.setGrantToRole(body);
-				} else if (req.code == 403) {
+					return false;
+				}
+				if (req.code == 403) {
 					useUserStore().isPermission = true;
-				} else if (req.metadata) {
+				}
+				if (req.metadata) {
 					this.getAllListRoles();
 					return true;
 				}
@@ -173,17 +170,19 @@ export const useAdminStore = defineStore('admin', {
 		},
 		async deleteRole(body) {
 			try {
-				const req = await $fetch('/api/admin/rbac/del_role', {
+				const req = await $fetch('/api/admin/role/del_role', {
 					method: 'DELETE',
 					body
 				});
 
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					// this.deleteRole(body);
-				} else if (req.code == 403) {
+					return false;
+				}
+				if (req.code == 403) {
 					useUserStore().isPermission = true;
-				} else if (req.metadata) {
+				}
+				if (req.metadata) {
 					this.roles = req.metadata;
 					return true;
 				}
@@ -195,20 +194,21 @@ export const useAdminStore = defineStore('admin', {
 		},
 		async deleteSrc(body) {
 			try {
-				const req = await $fetch('/api/admin/rbac/del_resource', {
+				const req = await $fetch('/api/admin/resource/delete_resource', {
 					method: 'DELETE',
 					body
 				});
-
-				if (req.code == 401) {
-					await useUserStore().refreshCookie();
-					// this.deleteRole(body);
-				} else if (req.code == 403) {
-					useUserStore().isPermission = true;
-				} else if (req.metadata) {
-					this.roles = req.metadata;
+				if (req.metadata) {
 					return true;
 				}
+				if (req.code == 401) {
+					await useUserStore().refreshCookie();
+					return false;
+				}
+				if (req.code == 403) {
+					useUserStore().isPermission = true;
+				}
+
 				return false;
 			} catch (e) {
 				console.error(e);
@@ -217,21 +217,54 @@ export const useAdminStore = defineStore('admin', {
 		},
 		async SyncSrc() {
 			try {
-				const req = await $fetch('/api/admin/get_import_resource', {
+				const req = await $fetch('/api/admin/resource/import_resource', {
 					method: 'GET'
 				});
-
+				if (req.metadata) {
+					return true;
+				}
 				if (req.code == 401) {
 					await useUserStore().refreshCookie();
-					// this.deleteRole(body);
-				} else if (req.code == 403) {
+					return false;
+				}
+				if (req.code == 403) {
 					useUserStore().isPermission = true;
-				} else if (req.metadata) {
-					return true;
 				}
 			} catch (e) {
 				console.error(e);
 				return false;
+			}
+		},
+		async updateSrc(body) {
+			const req = await $fetch('/api/admin/resource/patch_resource', {
+				method: 'PATCH',
+				body
+			});
+			if (req.metadata) {
+				return true;
+			}
+			if (req.code == 401) {
+				await useUserStore().refreshCookie();
+				return false;
+			}
+			if (req.code == 403) {
+				useUserStore().isPermission = true;
+			}
+		},
+		async updateRole(body) {
+			const req = await $fetch('/api/admin/role/edit_role', {
+				method: 'PATCH',
+				body
+			});
+			if (req.metadata) {
+				return true;
+			}
+			if (req.code == 401) {
+				await useUserStore().refreshCookie();
+				return false;
+			}
+			if (req.code == 403) {
+				useUserStore().isPermission = true;
 			}
 		}
 	},
