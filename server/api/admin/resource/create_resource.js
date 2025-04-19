@@ -6,19 +6,20 @@ export default defineEventHandler(async (event) => {
 		const query = getQuery(event);
 		const timestamp = new Date().getTime();
 		const body = await readBody(event);
+		const headers = getHeaders(event);
 		const hmacSignature = crypto
 			.createHmac('sha256', config.app.secretKey)
 			.update(timestamp.toString() + JSON.stringify(body || {}))
 			.digest('hex');
 		const queryString = new URLSearchParams(query).toString();
-		const url = `${config.app.apiUrl}/admin/resource/_create?${queryString}`;
+		const url = `${config.app.apiUrl}:3057/resource/_create?${queryString}`;
 		const response = await $fetch(url, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,
-				'x-client-id': getCookie(event, 'x-client-id'),
-				authorization: getCookie(event, 'authorization'),
+				 'authorization': headers['authorization'],
+        'x-client-id': headers['x-client-id'],
 				'x-timestamp': timestamp,
 				'x-hmac-signature': hmacSignature
 			},

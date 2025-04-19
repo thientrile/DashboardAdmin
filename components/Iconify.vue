@@ -14,19 +14,22 @@
 			variant="subtle" />
 
 		<template #body>
-			<div class="flex flex-col justify-center w-full">
+			<div class="flex  w-full justify-center w-full">
 				<UInput
+				class="w-full"
 					:loading="loading"
 					color="neutral"
 					v-model="searchTerm"
 					@keyup.enter="handleSearch"
 					list="search"
 					placeholder="Search..." />
+				<UButton @click="handleSearch" icon="material-symbols-light:search" />
 				<datalist id="search">
 					<option>
 						{{ search }}
 					</option>
 				</datalist>
+			
 			</div>
 			<div class="max-h-[250px] overflow-y-auto">
 				<span

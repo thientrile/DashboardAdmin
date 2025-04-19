@@ -133,12 +133,9 @@
 				<tr
 					@click="handleClearDataforNewSrc()"
 					v-for="(item, idx) in listResource"
-					:key="item.id">
+					:key="item.resourceId">
 					<td class="border border-slate-300">
 						<div class="flex justify-between">
-							<div>
-								<UIcon :name="item.icon" />
-							</div>
 							<div
 								@click="item.isChange = true"
 								v-show="general.actions.update">
@@ -146,9 +143,17 @@
 									:search="item.name"
 									v-model:icon="item.icon" />
 							</div>
+							<div>
+								<UIcon :name="item.icon" />
+							</div>
 						</div>
 					</td>
-					<td class="border border-slate-300 ...">{{ item.name }}</td>
+					<td class="border border-slate-300 ...">
+						
+						<btnCopyClipboard :text="item.name"/>
+						{{ item.name }}
+
+					</td>
 					<td
 						class="border border-slate-300"
 						@dblclick="item.isChange = true">
@@ -192,6 +197,7 @@
 </template>
 
 <script setup>
+	import btnCopyClipboard from './btnCopyClipboard.vue';
 	import Iconify from './Iconify.vue';
 	import { useAdminStore } from '~/store/admin';
 	import { useGeneralStore } from '~/store/general';

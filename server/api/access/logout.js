@@ -4,7 +4,7 @@
 import crypto from 'node:crypto';
 export default defineEventHandler(async (event) => {
 	const config = useRuntimeConfig();
-
+	const headers= getHeaders(event);
 	try {
 		const timestamp = new Date().getTime();
 		const hmacSignature = crypto
@@ -12,13 +12,13 @@ export default defineEventHandler(async (event) => {
 			.update(timestamp.toString() + JSON.stringify({}))
 			.digest('hex');
 
-		const response = await $fetch(config.app.apiUrl + '/access/_logout', {
+		const response = await $fetch(`${config.app.apiUrl}:3056/_logout`, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,
-				'x-client-id': getCookie(event, 'x-client-id'),
-				authorization: getCookie(event, 'authorization'),
+				 'x-rtoken-id': headers['x-rtoken-id'],
+        			'x-client-id': headers['x-client-id'],
 				'x-timestamp': timestamp,
 				'x-hmac-signature': hmacSignature
 			}

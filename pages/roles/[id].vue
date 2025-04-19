@@ -1,325 +1,276 @@
 <!-- @format -->
 
 <template>
-	<Main>
-		<div
-			id="seach"
-			class="sticky top-0 flex justify-between text-xs z-50 bg-white dark:bg-black shadow-sm p-3 rounded-2xl">
-			<div class="flex items-center">
-				<UInput
-					placeholder="Search"
-					icon="ic:baseline-search"
-					class="w-full" />
-			</div>
-			<div class="flex gap-2 justify-between items-center">
-				<UTooltip text="Refresh permissions">
-					<UButton
-						icon="material-symbols:refresh"
-						:loading="isLoading"
-						@click="refresh"
-						color="primary"
-						variant="subtle" />
-				</UTooltip>
-				<div v-show="general.actions.create">
-					<UTooltip text="Add new resource">
-						<UButton
-							@click="newRole.isShow = !newRole.isShow"
-							icon="material-symbols:add"
-							color="primary"
-							variant="subtle" />
-					</UTooltip>
-				</div>
-			</div>
-		</div>
-		<div
-			class="mt-2 flex justify-around bg-white dark:bg-black shadow-2xl p-5 rounded-2xl">
-			<table class="border-collapse border border-slate-400 w-full">
-				<thead>
-					<tr>
-						<th
-							class="border border-slate-300 text-center"
-							rowspan="2">
-							STT
-						</th>
-						<th
-							class="border border-slate-300 text-center"
-							rowspan="2">
-							Name resource
-						</th>
-						<th
-							class="border border-slate-300 text-center"
-							colspan="4">
-							Permissions
-						</th>
-						<th
-							class="border border-slate-300 text-center"
-							rowspan="2">
-							Attribute
-						</th>
-						<th
-							class="border border-slate-300 text-center"
-							rowspan="2">
-							Actions
-						</th>
-					</tr>
-					<tr>
-						<td class="border border-slate-300 text-center font-bold">Read</td>
-						<td class="border border-slate-300 text-center font-bold">
-							Create
-						</td>
-						<td class="border border-slate-300 text-center font-bold">
-							Update
-						</td>
-						<td class="border border-slate-300 text-center font-bold">
-							Delete
-						</td>
-					</tr>
-				</thead>
-				<tbody>
-					<tr
-						v-for="(item, idx) in role.grants"
-						:key="idx">
-						<td class="border border-slate-300 w-20 text-center">{{ idx }}</td>
-						<td class="border border-slate-300 w-20">{{ item.name }}</td>
-						<td class="border border-slate-300 ...">
-							<div class="flex gap-2 px-2">
-								<USwitch
-									v-model="item.permissions.read.checked"
-									:disabled="item.isRoot" />
-								<URadioGroup
-									:disabled="item.isRoot"
-									v-show="item.permissions.read.checked"
-									orientation="horizontal"
-									v-model="item.permissions.read.isAny"
-									:items="isAny" />
-							</div>
-						</td>
-						<td class="border border-slate-300 ...">
-							<div class="flex gap-2 px-2">
-								<USwitch
-									v-model="item.permissions.create.checked"
-									:disabled="item.isRoot" />
-								<URadioGroup
-									:disabled="item.isRoot"
-									v-show="item.permissions.create.checked"
-									orientation="horizontal"
-									v-model="item.permissions.create.isAny"
-									:items="isAny" />
-							</div>
-						</td>
-						<td class="border border-slate-300 ...">
-							<div class="flex gap-2 px-2">
-								<USwitch
-									v-model="item.permissions.update.checked"
-									:disabled="item.isRoot" />
-								<URadioGroup
-									:disabled="item.isRoot"
-									v-show="item.permissions.update.checked"
-									orientation="horizontal"
-									v-model="item.permissions.update.isAny"
-									:items="isAny" />
-							</div>
-						</td>
-						<td class="border border-slate-300 ...">
-							<div class="flex gap-2 px-2">
-								<USwitch
-									v-model="item.permissions.delete.checked"
-									:disabled="item.isRoot" />
-								<URadioGroup
-									:disabled="item.isRoot"
-									v-show="item.permissions.delete.checked"
-									orientation="horizontal"
-									v-model="item.permissions.delete.isAny"
-									:items="isAny" />
-							</div>
-						</td>
-						<td class="border border-slate-300 w-30">
-							<div class="flex justify-between w-40">
-								<USelect
-									:disabled="item.isRoot"
-									v-if="!item.isAdd"
-									v-model="item.attributes"
-									multiple
-									:items="
-										item.attributes.includes('*')
-											? item.suggest_not
-											: item.suggest
-									"
-									class="w-full overflow-hidden text-ellipsis whitespace-normal" />
-								<UInput
-									placeholder="Enter attribute"
-									v-model="item.attrNewValue"
-									v-else
-									class="w-full" />
-								<UTooltip
-									text="New attribute"
-									v-if="!item.isAdd">
-									<UButton
-										:disabled="item.isRoot"
-										@click="item.isAdd = !item.isAdd"
-										variant="outline"
-										icon="material-symbols:add" />
-								</UTooltip>
-								<UTooltip
-									text="Add attribute"
-									v-else>
-									<UButton
-										@click="addItemAtt(idx)"
-										variant="outline"
-										icon="material-symbols:add" />
-								</UTooltip>
-							</div>
-						</td>
-						<td class="border border-slate-300 ...">
-							<div class="flex">
-								<div v-show="!item.isRoot">
-									<UTooltip text="Save Grant">
-										<UButton
-											:loading="item.isloading"
-											icon="material-symbols:save-outline"
-											color="success"
-											variant="outline" />
-									</UTooltip>
-								</div>
-								<div v-show="!item.isRoot">
-									<UTooltip text="Delete Grant">
-										<UButton
-											:loading="item.isloading"
-											@click="deleteGrants(item._id, idx)"
-											icon="tabler:trash"
-											color="error"
-											variant="outline" />
-									</UTooltip>
-								</div>
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-	</Main>
+  <Main>
+    <div
+      id="seach"
+      class="sticky top-0 flex justify-between text-xs z-50 bg-white dark:bg-black shadow-sm p-3 rounded-2xl"
+    >
+      <div class="flex items-center">
+        <UInput placeholder="Search" icon="ic:baseline-search" class="w-full" />
+      </div>
+      <div class="flex gap-2 justify-between items-center">
+        <UTooltip text="Refresh permissions">
+          <UButton
+            icon="material-symbols:refresh"
+            :loading="is.loading"
+            @click="refresh"
+            color="primary"
+            variant="subtle"
+          />
+        </UTooltip>
+        <div v-show="general.actions.create">
+          <UTooltip text="Create new permission">
+            <UButton
+              @click="openModelResource"
+              icon="material-symbols:add"
+              color="primary"
+              variant="subtle"
+            >
+              <UKbd>N</UKbd>
+            </UButton>
+          </UTooltip>
+          <UModal v-model:open="modelResource.model">
+            <template #header>
+              <UInput
+                v-model="modelResource.search"
+                @change="onChangeSearchModel"
+                icon="i-lucide-search"
+                placeholder="Search..."
+              />
+            </template>
+            <template #body>
+              <UTable
+                ref="table"
+                :data="modelResource.resources"
+                :columns="modelResource.collums"
+                class="flex-1 max-h-[312px]"
+              />
+            </template>
+            <template #footer>
+              <div class="w-full flex justify-between">
+                <div>
+                  <span
+                    >{{
+                      table?.tableApi?.getFilteredSelectedRowModel().rows
+                        .length || 0
+                    }}
+                    of</span
+                  >
+                  <span>
+                    {{
+                      table?.tableApi?.getFilteredRowModel().rows.length || 0
+                    }}
+                    row(s) selected.
+                  </span>
+                </div>
+
+                <div>
+                  <UTooltip text="Open on GitHub">
+                    <UButton
+                      label="Add"
+                      @click="BtnModelAdd"
+                      variant="subtle"
+                    />
+                  </UTooltip>
+                </div>
+              </div>
+            </template>
+          </UModal>
+        </div>
+
+        <div v-show="is.change&&general.actions.update">
+          <UTooltip text="Save permissions">
+            <UButton
+              icon="material-symbols:save-outline"
+              @click="is.save = true"
+              color="primary"
+              variant="subtle"
+            >
+              <UKbd>S</UKbd></UButton
+            >
+          </UTooltip>
+        </div>
+      </div>
+    </div>
+    <div
+      class="mt-2 flex justify-around bg-white dark:bg-black shadow-2xl p-5 rounded-2xl"
+    >
+      <TableGrants
+        v-if="role.grants"
+        :roleId="role._id"
+        :grants="role.grants"
+        v-model:is="is"
+      />
+    </div>
+  </Main>
 </template>
 
 <script setup>
-	import Main from '~/layouts/main.vue';
-	import { useGeneralStore } from '~/store/general';
-	import { useAdminStore } from '~/store/admin';
-	const admin = useAdminStore();
-	const general = useGeneralStore();
-	const route = useRoute();
-	const router = useRouter();
-	const grants = ref([]);
-	const isLoading = ref(false);
+import Main from "~/layouts/main.vue";
+import { useGeneralStore } from "~/store/general";
+import { useAdminStore } from "~/store/admin";
+import TableGrants from "~/components/role/TableGrants.vue";
+const admin = useAdminStore();
+const general = useGeneralStore();
+const route = useRoute();
+const router = useRouter();
 
-	const role = ref({});
-	const isAny = ref([
-		{
-			label: 'Any',
-			value: true
-		},
-		{
-			label: 'Own',
-			value: false
-		}
-	]);
-	definePageMeta({ middleware: 'auth' });
-	const refresh = async () => {
-		isLoading.value = true;
-		await admin.getAllListRoles();
-		isLoading.value = false;
+const newGrants = ref([]);
+const role = ref({});
+const is = ref({
+  loading: false,
+  change: false,
+  save: false,
+});
 
-		getGrants();
-	};
-	onMounted(async () => {
-		if (admin.roles.length === 0) {
-			isLoading.value = true;
-			await admin.getAllListRoles();
-			isLoading.value = false;
-		}
+definePageMeta({ middleware: "auth" });
+const refresh = async () => {
+  is.value.loading = true;
+  await admin.getAllListRoles();
+  is.value.loading = false;
 
-		getGrants();
-	});
+  getGrants();
+};
+onMounted(async () => {
+  if (admin.roles.length === 0) {
+    is.value.loading = true;
+    await admin.getAllListRoles();
+    is.value.loading = false;
+  }
 
-	const getGrants = () => {
-		if (route.query.slug) {
-			role.value = admin.roles.find((item) => item.slug == route.query.slug);
-		} else if (route.params.id) {
-			role.value = admin.roles.find((item) => item.name == route.params.id);
-		} else {
-			router.push('/roles');
-		}
+  getGrants();
+});
 
-		role.value.grants.forEach((grant) => {
-			// Convert attributes to an array
-			if (typeof grant.attributes === 'string') {
-				grant.attributes = grant.attributes.split(',');
-			}
-			grant.isloading = false;
-			// Prepare suggestions
-			grant.suggest_not = grant.suggest.map((item) => `!${item}`);
-			grant.suggest.push('*');
-			grant.suggest_not.push('*');
+const getGrants = () => {
+  const roleId = route.params.id;
+  if (!roleId) return router.back();
 
-			// Initialize additional properties
-			grant.isAdd = false;
-			grant.isEdit = false;
-			grant.attrNewValue = '';
+  role.value = admin.roles.find((item) => item.name === roleId);
+  if (!role.value) return router.back();
 
-			// Initialize permissions
-			grant.permissions = {
-				read: { checked: false, isAny: false },
-				create: { checked: false, isAny: false },
-				update: { checked: false, isAny: false },
-				delete: { checked: false, isAny: false }
-			};
+  // Lọc bỏ grants không hợp lệ
+  role.value.grants = role.value.grants.filter((grant) => grant.name);
 
-			// Update permissions based on actions
-			grant.actions.forEach((action) => {
-				const [actionType, scope] = action.split(':');
-				const isAny = scope === 'any';
+  role.value.grants = role.value.grants.map((grant) => ({
+    ...grant,
+    attributes:
+      typeof grant.attributes === "string"
+        ? grant.attributes.split(",")
+        : grant.attributes,
+    isloading: false,
+    suggest_not: grant.suggest.map((item) => `!${item}`).concat("*"),
+    suggest: [...grant.suggest, "*"],
+    isAdd: false,
+    attrNewValue: "",
+    permissions: ["read", "create", "update", "delete"].reduce(
+      (acc, action) => {
+        acc[action] = { checked: false, value: "own" };
+        return acc;
+      },
+      {}
+    ),
+  }));
 
-				if (grant.permissions[actionType]) {
-					grant.permissions[actionType].isAny = isAny;
-					grant.permissions[actionType].checked = true;
-				}
-			});
-		});
-		return grants;
-	};
+  // Cập nhật quyền (permissions)
+  role.value.grants.forEach((grant) => {
+    grant.actions.forEach((action) => {
+      const [actionType, scope] = action.split(":");
+      if (grant.permissions[actionType]) {
+        grant.permissions[actionType].value = scope;
+        grant.permissions[actionType].checked = true;
+      }
+    });
+  });
 
-	const addItemAtt = (idx) => {
-		if (role.value.grants[idx].attrNewValue === '') {
-			role.value.grants[idx].attrNewValue = '';
-			role.value.grants[idx].isAdd = false;
-			return;
-		}
-		const newvalue =
-			role.value.grants[idx].attributes.includes('*') &&
-			!role.value.grants[idx].attrNewValue.includes('!')
-				? `!${role.value.grants[idx].attrNewValue}`
-				: role.value.grants[idx].attrNewValue;
-		if (!role.value.grants[idx].attributes.includes(newvalue)) {
-			role.value.grants[idx].attributes.push(newvalue);
-		}
-		if (
-			role.value.grants[idx].attributes.includes('*') &&
-			!role.value.grants[idx].suggest_not.includes(newvalue)
-		) {
-			role.value.grants[idx].suggest_not.push(newvalue);
-		} else if (!role.value.grants[idx].suggest.includes(newvalue)) {
-			role.value.grants[idx].suggest.push(newvalue);
-		}
-		role.value.grants[idx].attrNewValue = '';
-		role.value.grants[idx].isAdd = false;
-	};
-	const deleteGrants = async (id, idx) => {
-		const body = {
-			roleId: role.value._id,
-			grantId: id
-		};
-		role.value.grants[idx].isloading = true;
-		await admin.deleteGrantToRole(body);
-		role.value.grants.splice(idx, 1);
-		role.value.grants[idx].isloading = false;
-	};
+  return role.value.grants;
+};
+
+// handdle model add perrmistion
+import { h, resolveComponent } from "vue";
+const UCheckbox = resolveComponent("UCheckbox");
+const modelResource = ref({
+  model: false,
+  search: ref(""),
+  loading: false,
+  resources: [],
+  collums: [
+    {
+      id: "select",
+      header: ({ table }) =>
+        h(UCheckbox, {
+          modelValue: table.getIsSomePageRowsSelected()
+            ? "indeterminate"
+            : table.getIsAllPageRowsSelected(),
+          label: "Select all",
+          "onUpdate:modelValue": (value) =>
+            table.toggleAllPageRowsSelected(!!value),
+        }),
+      cell: ({ row }) =>
+        h(UCheckbox, {
+          modelValue: row.getIsSelected(),
+          "onUpdate:modelValue": (value) => {
+            if (!!value && !newGrants.value.includes(row.original._id)) {
+              newGrants.value.push(row.original._id);
+            } else {
+              const idx = newGrants.value.indexOf(row.original._id);
+              if (idx > -1) {
+                newGrants.value.splice(idx, 1);
+              }
+            }
+            return row.toggleSelected(!!value);
+          },
+          ariaLabel: "Select row",
+          label: row.original.name,
+          value: row.original._id,
+          id: row.original._id,
+          name: row.original.name,
+        }),
+    },
+  ],
+});
+const table = useTemplateRef("table");
+const openModelResource = async () => {
+  if (!general.actions.create) return;
+  newGrants.value = [];
+  if (admin.resources.length === 0) {
+    await admin.getSrc({
+      limit: 10,
+      page: 1,
+      search: "",
+    });
+  }
+
+  modelResource.value.resources = admin.resources;
+  modelResource.value.model = true;
+};
+defineShortcuts({
+  n: async () => await openModelResource(),
+});
+const onChangeSearchModel = async () => {
+  await admin.getSrc({
+    limit: 10,
+    page: 1,
+    search: modelResource.value.search,
+  });
+  modelResource.value.resources = admin.resources;
+};
+const BtnModelAdd = async () => {
+  modelResource.loading = true;
+  const body = {
+    roleId: role.value._id,
+    grants: [],
+  };
+  newGrants.value.forEach((i) => {
+    body.grants.push({
+      resourceId: i,
+    });
+  });
+
+  await admin.addGrantToRole(body);
+  modelResource.value.loading = false;
+  modelResource.value.model = false;
+  await general.getMenu();
+  getGrants();
+};
 </script>

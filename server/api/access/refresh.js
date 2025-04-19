@@ -2,7 +2,7 @@
 import crypto from 'node:crypto';
 
 export default defineEventHandler(async (event) => {
-	
+	const headers= getHeaders(event);
 	
 	try {
 		const config = useRuntimeConfig();
@@ -12,13 +12,13 @@ export default defineEventHandler(async (event) => {
 				.createHmac('sha256', config.app.secretKey)
 				.update(timestamp.toString() + JSON.stringify(body||{}))
 				.digest('hex');
-		const response = await $fetch(config.app.apiUrl + '/access/_refresh', {
+		const response = await $fetch(`${config.app.apiUrl}:3056/_refresh`, {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,
-				'x-client-id': getCookie(event, 'x-client-id'),
-				'x-rtoken-id': getCookie(event, 'x-rtoken-id'),
+				'x-rtoken-id': headers['x-rtoken-id'],
+				'x-client-id': headers['x-client-id'],
 				'x-timestamp': timestamp,
 				'x-hmac-signature': hmacSignature
 			}

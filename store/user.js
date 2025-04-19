@@ -1,148 +1,188 @@
 /** @format */
-import { defineStore } from 'pinia';
-export const useUserStore = defineStore('user', {
-	state: () => ({
-		isAuthenticated: false,
-		profile: {
-			email: '',
-			name: '',
-			phone: '',
-			role: '',
-			id: ''
-		},
-		isOverLogout: false,
-		isPermission: false
-	}),
+import { defineStore } from "pinia";
 
-	actions: {
-		async login(body) {
-			const req = await $fetch('/api/access/login', {
-				method: 'POST',
-				body: JSON.stringify(body)
-			});
+export const useUserStore = defineStore("user", {
+  state: () => ({
+    isAuthenticated: false,
+    profile: {
+      email: "",
+      name: "",
+      phone: "",
+      role: "",
+      id: "",
+    },
+    isOverLogout: false,
+    isPermission: false,
+  }),
 
-			if (req.metadata) {
-				const { tokens, uniqueId } = req.metadata;
-				await this.authenticate(tokens, uniqueId);
-				return true;
-			}
-			return false;
-		},
-		async register(body) {
-			const req = await $fetch('/api/access/register', {
-				method: 'POST',
-				body: JSON.stringify(body)
-			});
-			if (req.metadata) {
-				const { tokens, uniqueId } = req.metadata;
-				await this.authenticate(tokens, uniqueId);
-				return true;
-			}
-			return false;
-		},
+  actions: {
+    async login(body) {
+      console.log("🚀 ~ login ~ body:", body);
+      const { handleApiError } = useApiErrorHandler();
+      try {
+        const req = await $fetch("/api/access/login", {
+          method: "POST",
+          body: JSON.stringify(body),
+        });
+        console.log("🚀 ~ login ~ req:", req);
 
-		async authenticate(tokens, uniqueId) {
-			this.isAuthenticated = true;
-			useCookie('authorization', {
-				maxAge: 60 * 60 * 24 * 1
-			}).value = tokens.accessToken;
-			useCookie('x-rtoken-id', {
-				maxAge: 60 * 60 * 24 * 7
-			}).value = tokens.refreshToken;
-			useCookie('x-client-id', {
-				maxAge: 60 * 60 * 24 * 7
-			}).value = uniqueId;
-		},
-		async logout() {
-			const req = await $fetch('/api/access/logout', {
-				method: 'POST'
-			});
+        if (req.metadata) {
+          const { tokens, uniqueId } = req.metadata;
+          await this.authenticate(tokens, uniqueId);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        handleApiError(error);
+        return false;
+      }
+    },
 
-			if (req.code === 401) {
-				this.refreshCookie();
-				return false;
-			}
-			if (req.metadata) {
-				// Clear tokens from cookies
-				this.isAuthenticated = false;
-				this.isAuthenticated = false;
-				this.profile = {};
-				useCookie('authorization', { maxAge: -1 }).value = null;
-				useCookie('x-rtoken-id', { maxAge: -1 }).value = null;
-				useRouter().push('/auth');
-				useCookie('x-client-id', { maxAge: -1 }).value = null;
-				return true;
-			}
-		},
+    async register(body) {
+      const { handleApiError } = useApiErrorHandler();
+      try {
+        const req = await $fetch("/api/access/register", {
+          method: "POST",
+          body: JSON.stringify(body),
+        });
 
-		async refreshCookie() {
-			let req = await $fetch('/api/access/refresh', {
-				method: 'POST'
-			});
-			if (req.metadata) {
-				const { tokens, uniqueId } = req.metadata;
-				await this.authenticate(tokens, uniqueId);
-				return true;
-			} else if (req.code === 401) {
-				this.isAuthenticated = false;
-				this.isAuthenticated = false;
-				this.profile = {};
-				useCookie('authorization', { maxAge: -1 }).value = null;
-				useCookie('x-rtoken-id', { maxAge: -1 }).value = null;
-				useCookie('x-client-id', { maxAge: -1 }).value = null;
-				useRouter().push('/auth');
-				return false;
-			}
-		},
-		async verify() {
-			if (!useCookie('x-client-id').value) {
-				this.isAuthenticated = false;
-				this.isAuthenticated = false;
-				this.profile = {};
-				useCookie('authorization', { maxAge: -1 }).value = null;
-				useCookie('x-rtoken-id', { maxAge: -1 }).value = null;
-				useCookie('x-client-id', { maxAge: -1 }).value = null;
-				useRouter().push('/auth');
-				return false;
-			}
+        if (req.metadata) {
+          const { tokens, uniqueId } = req.metadata;
+          await this.authenticate(tokens, uniqueId);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        handleApiError(error);
+        return false;
+      }
+    },
 
-			let req = await $fetch('/api/access/verify')
-		
-			if (req.metadata) {
-				this.profile = req.metadata;
-				this.isAuthenticated = true;
-				return true;
-			} else if (req.code === 401) {
-				const reslut = await this.refreshCookie();
-				if (reslut) {
-					await this.verify();
-				}
-				return false;
-			}
-		},
-		async getinfo() {
-			let req = await $fetch('/api/user/info', {
-				method: 'POST'
-			});
-			if (req.metadata) {
-				this.profile = req.metadata;
+    async authenticate(tokens, uniqueId) {
+      try {
+        this.isAuthenticated = true;
+        useCookie("c_user").value = uniqueId;
+        localStorage.setItem("authorization", tokens.accessToken);
+        localStorage.setItem("x-rtoken-id", tokens.refreshToken);
+        localStorage.setItem("x-client-id", uniqueId);
+      } catch (error) {
+        console.error("Authenticate error:", error);
+      }
+    },
 
-				this.isAuthenticated = true;
-				return true;
-			} else if (req.code === 403) {
-				this.isPermission = true;
-				return false;
-			} else if (req.code === 401) {
-				await this.refreshCookie();
-			}
-			return false;
-		},
+    async logout() {
+      const { handleApiError } = useApiErrorHandler();
+      try {
+        const req = await $fetch("/api/access/logout", {
+          method: "POST",
+          headers: {
+            "x-rtoken-id": localStorage.getItem("x-rtoken-id"),
+            "x-client-id": localStorage.getItem("x-client-id"),
+          },
+        });
 
-		checkAuth() {
-			this.isAuthenticated = true;
-		}
-	},
-	getters: {
-		isLogin: (state) => state.isAuthenticated // Check if the user has a valid token
-	}
+        if (req.code === 401) {
+          await this.refreshCookie();
+          return false;
+        }
+
+        if (req.metadata) {
+          this.isAuthenticated = false;
+          this.profile = {};
+          localStorage.removeItem("authorization");
+          localStorage.removeItem("x-rtoken-id");
+          localStorage.removeItem("x-client-id");
+          navigateTo("/");
+          return true;
+        }
+      } catch (error) {
+        handleApiError(error);
+        return false;
+      }
+    },
+
+    async refreshCookie() {
+      const { handleApiError } = useApiErrorHandler();
+      try {
+        const req = await $fetch("/api/access/refresh", {
+          method: "POST",
+          headers: {
+            "x-rtoken-id": localStorage.getItem("x-rtoken-id"),
+            "x-client-id": localStorage.getItem("x-client-id"),
+          },
+        });
+
+        if (req.metadata) {
+          const { tokens, uniqueId } = req.metadata;
+          await this.authenticate(tokens, uniqueId);
+          return true;
+        } else if (req.code === 401) {
+          this.isAuthenticated = false;
+          this.profile = {};
+          return false;
+        }
+      } catch (error) {
+        handleApiError(error);
+        return false;
+      }
+    },
+
+    async verify() {
+      const { handleApiError } = useApiErrorHandler();
+      try {
+        const req = await $fetch("/api/access/verify", {
+          method: "POST",
+          headers: {
+            authorization: localStorage.getItem("authorization"),
+            "x-client-id": localStorage.getItem("x-client-id"),
+          },
+        });
+
+        if (req.metadata) {
+          this.profile = req.metadata;
+          this.isAuthenticated = true;
+          return true;
+        } else if (req.code === 401) {
+          const result = await this.refreshCookie();
+          if (result) return await this.verify();
+        }
+        return false;
+      } catch (error) {
+        handleApiError(error);
+        return false;
+      }
+    },
+
+    async getinfo() {
+      const { handleApiError } = useApiErrorHandler();
+      try {
+        const req = await $fetch("/api/user/info", {
+          method: "POST",
+        });
+
+        if (req.metadata) {
+          this.profile = req.metadata;
+          this.isAuthenticated = true;
+          return true;
+        } else if (req.code === 403) {
+          this.isPermission = true;
+          return false;
+        } else if (req.code === 401) {
+          await this.refreshCookie();
+        }
+        return false;
+      } catch (error) {
+        handleApiError(error);
+        return false;
+      }
+    },
+
+    checkAuth() {
+      this.isAuthenticated = true;
+    },
+  },
+
+  getters: {
+    isLogin: (state) => state.isAuthenticated,
+  },
 });

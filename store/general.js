@@ -17,13 +17,18 @@ export const useGeneralStore = defineStore('general', {
 			update: false,
 			delete: false
 		},
-		icons: []
+		icons: [],
+		redirectPath: ''
 	}),
 
 	actions: {
 		async getMenu() {
 			const req = await $fetch('/api/admin/_getMenu', {
-				method: 'GET'
+				method: 'GET',
+				 headers: {
+          authorization: localStorage.getItem("authorization"),
+          "x-client-id": localStorage.getItem("x-client-id"),
+        },
 			});
 			if (req.metadata) {
 				this.menuArrs = req.metadata.map((item) => {

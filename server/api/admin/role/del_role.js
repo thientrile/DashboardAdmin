@@ -11,14 +11,14 @@ export default defineEventHandler(async (event) => {
 			.update(timestamp.toString() + JSON.stringify(body || {}))
 			.digest('hex');
 		const queryString = new URLSearchParams(query).toString();
-		const url = `${config.app.apiUrl}/admin/role/_delete?${queryString}`;
+		const url = `${config.app.apiUrl}:3057/role/_delete?${queryString}`;
 		const response = await $fetch(url, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,
-				'x-client-id': getCookie(event, 'x-client-id'),
-				authorization: getCookie(event, 'authorization'),
+				 authorization: getHeaders(event)["authorization"],
+        "x-client-id": getHeaders(event)["x-client-id"],
 				'x-timestamp': timestamp,
 				'x-hmac-signature': hmacSignature
 			},

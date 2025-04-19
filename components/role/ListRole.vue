@@ -175,9 +175,7 @@
 									text="Access permission">
 									<UButton
 										:loading="item.isLoading"
-										@click="
-											router.push(`/roles/${item.name}?slug=${item.slug}`)
-										"
+										@click="router.push(`/roles/${item.name}`)"
 										icon="icon-park-outline:permissions"
 										color="neutral"
 										variant="outline" />
@@ -346,5 +344,20 @@
 			generate: false
 		};
 	};
-	
+	defineShortcuts({
+		ctrl_s: async () => {
+			if (general.actions.update) {
+				const lists = listRole.value.map(async (item, idx) => {
+					if (
+						item.change.name ||
+						item.change.description ||
+						item.change.generate
+					) {
+						return await handlEdit(item, idx);
+					}
+				});
+				await Promise.all(lists);
+			}
+		}
+	});
 </script>

@@ -145,6 +145,7 @@
 			};
 			isLoading.value = true;
 			const result = await user.login(body);
+			console.log("🚀 ~ handleFormSubmit ~ result:", result)
 			isLoading.value = false;
 			isLoginError.value = !result;
 			if (result) {

@@ -4,6 +4,7 @@ export default defineEventHandler(async (event) => {
 	try {
 		const config = useRuntimeConfig();
 		const query = getQuery(event);
+		const headers = getHeaders(event);
 		const body = await readBody(event);
 		const timestamp = new Date().getTime();
 		const hmacSignature = crypto
@@ -11,14 +12,14 @@ export default defineEventHandler(async (event) => {
 			.update(timestamp.toString() + JSON.stringify(body || {}))
 			.digest('hex');
 		const queryString = new URLSearchParams(query).toString();
-		const url = `${config.app.apiUrl}/admin/rbac/_delgrant?${queryString}`;
+		const url = `${config.app.apiUrl}:3057/rbac/_delgrant?${queryString}`;
 		const response = await $fetch(url, {
 			method: 'delete',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-api-key': config.app.apiKey,
-				'x-client-id': getCookie(event, 'x-client-id'),
-				authorization: getCookie(event, 'authorization'),
+				 'authorization': headers['authorization'],
+        'x-client-id': headers['x-client-id'],
 				'x-timestamp': timestamp,
 				'x-hmac-signature': hmacSignature
 			},

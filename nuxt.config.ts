@@ -9,7 +9,7 @@ export default defineNuxtConfig({
 	css: ['~/assets/css/main.css'],
 	runtimeConfig: {
 		app: {
-			apiUrl: `${process.env.API_SCHEME}://${process.env.API_HOST}:${process.env.API_PORT}`,
+			apiUrl: `${process.env.API_SCHEME}://${process.env.API_HOST}`,
 			apiKey: process.env.API_KEY,
 			secretKey: process.env.SECRET_KEY,
 			pageTransition: {

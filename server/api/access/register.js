@@ -14,7 +14,7 @@ try{
 		.update(timestamp.toString() + JSON.stringify(body||{}))
 		.digest('hex');
 
-  const response = await $fetch(config.app.apiUrl + '/access/_register', {
+  const response = await $fetch(`${config.app.apiUrl}:3056 /_register`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

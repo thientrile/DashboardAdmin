@@ -5,15 +5,13 @@ import crypto from 'node:crypto';
 export default defineEventHandler(async (event) => {
 	const config = useRuntimeConfig();
 	const body = await readBody(event);
-	
 	try {
 		const timestamp = new Date().getTime();
 		const hmacSignature = crypto
 			.createHmac('sha256', config.app.secretKey)
 			.update(timestamp.toString() + JSON.stringify(body||{}))
 			.digest('hex');
-
-		const response = await $fetch(config.app.apiUrl + '/access/_login', {
+		const response = await $fetch(`${config.app.apiUrl}:3056/_login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
